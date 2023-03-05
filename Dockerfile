@@ -9,7 +9,7 @@ RUN pacman-key --init && pacman-key --populate archlinux
 RUN yes | pacman -Syu
 RUN yes | pacman -S git zsh
 RUN mkdir -p /root/.config
-VOLUME [ "/root/.config", "/root/repos", "/root/.vscode-server/extensions", "/root/go/bin", "/var/lib/docker", "/root/.local/share/pnpm", "/usr/local/rvm/gems", "/root/.ssh" ]
+VOLUME [ "/root/.config", "/root/repos", "/root/.vscode-server/extensions", "/root/go/bin", "/var/lib/docker", "/root/.local/share/pnpm", "/usr/local/rvm/gems", "/root/.ssh", "/root/.m2" ]
 # end
 
 # z
