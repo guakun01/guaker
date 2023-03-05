@@ -4,6 +4,8 @@ WORKDIR /tmp
 ENV SHELL /bin/bash
 ADD mirrorlist /etc/pacman.d/mirrorlist
 ENV UPDATE_TIME 20220708T10:55:00+08:00
+RUN yes | pacman -Sy archlinux-keyring
+RUN pacman-key --init && pacman-key --populate archlinux
 RUN yes | pacman -Syu
 RUN yes | pacman -S git zsh
 RUN mkdir -p /root/.config
@@ -26,33 +28,33 @@ ENV SHELL /bin/zsh
 RUN yes | pacman -S curl tree
 # end
 
-# Ruby
-ADD rvm-stable.tar.gz /tmp/rvm-stable.tar.gz
-ENV PATH /usr/local/rvm/rubies/ruby-3.0.0/bin:$PATH
-ENV PATH /usr/local/rvm/gems/ruby-3.0.0/bin:$PATH
-ENV PATH /usr/local/rvm/bin:$PATH
-ENV GEM_HOME /usr/local/rvm/gems/ruby-3.0.0
-ENV GEM_PATH /usr/local/rvm/gems/ruby-3.0.0:/usr/local/rvm/gems/ruby-3.0.0@global
+# # Ruby
+# ADD rvm-stable.tar.gz /tmp/rvm-stable.tar.gz
+# ENV PATH /usr/local/rvm/rubies/ruby-3.0.0/bin:$PATH
+# ENV PATH /usr/local/rvm/gems/ruby-3.0.0/bin:$PATH
+# ENV PATH /usr/local/rvm/bin:$PATH
+# ENV GEM_HOME /usr/local/rvm/gems/ruby-3.0.0
+# ENV GEM_PATH /usr/local/rvm/gems/ruby-3.0.0:/usr/local/rvm/gems/ruby-3.0.0@global
 
-RUN touch /root/.config/.gemrc; ln -s /root/.config/.gemrc /root/.gemrc;
-RUN mv /tmp/rvm-stable.tar.gz/rvm-rvm-6bfc921 /tmp/rvm && cd /tmp/rvm && ./install --auto-dotfiles &&\
-		echo "ruby_url=https://cache.ruby-china.com/pub/ruby" > /usr/local/rvm/user/db &&\
-		echo 'gem: --no-document --verbose' >> "$HOME/.gemrc" &&\
-		rvm install ruby-3.0.0
-RUN gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/ &&\
-		gem install solargraph rubocop rufo
-# end
+# RUN touch /root/.config/.gemrc; ln -s /root/.config/.gemrc /root/.gemrc;
+# RUN mv /tmp/rvm-stable.tar.gz/rvm-rvm-6bfc921 /tmp/rvm && cd /tmp/rvm && ./install --auto-dotfiles &&\
+# 		echo "ruby_url=https://cache.ruby-china.com/pub/ruby" > /usr/local/rvm/user/db &&\
+# 		echo 'gem: --no-document --verbose' >> "$HOME/.gemrc" &&\
+# 		rvm install ruby-3.0.0
+# RUN gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/ &&\
+# 		gem install solargraph rubocop rufo
+# # end
 
-# Install Go
-RUN yes | pacman -Syy; yes | pacman -S go
-ENV GOPATH /root/go
-ENV PATH $GOPATH/bin:$PATH
-RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
-ENV GOROOT /usr/lib/go
-RUN go env -w GO111MODULE=on &&\
-    go env -w GOPROXY=https://goproxy.cn,direct &&\
-		go install github.com/silenceper/gowatch@latest
-# end
+# # Install Go
+# RUN yes | pacman -Syy; yes | pacman -S go
+# ENV GOPATH /root/go
+# ENV PATH $GOPATH/bin:$PATH
+# RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
+# ENV GOROOT /usr/lib/go
+# RUN go env -w GO111MODULE=on &&\
+#     go env -w GOPROXY=https://goproxy.cn,direct &&\
+# 		go install github.com/silenceper/gowatch@latest
+# # end
 
 # Dev env for JS
 ENV PNPM_HOME /root/.local/share/pnpm
@@ -101,10 +103,10 @@ RUN mkdir -p /root/.config; \
     touch /root/.config/.gitconfig; ln -s /root/.config/.gitconfig /root/.gitconfig; \
     touch /root/.config/.zsh_history; ln -s /root/.config/.zsh_history /root/.zsh_history; \
     touch /root/.config/.z; ln -s /root/.config/.z /root/.z; \
-    touch /root/.config/.rvmrc; ln -s /root/.config/.rvmrc /root/.rvmrc; \
+    # touch /root/.config/.rvmrc; ln -s /root/.config/.rvmrc /root/.rvmrc; \
     touch /root/.config/.bashrc; ln -s /root/.config/.bashrc /root/.bashrc.local; \
     touch /root/.config/.zshrc; ln -s /root/.config/.zshrc /root/.zshrc.local;
-RUN echo "rvm_silence_path_mismatch_check_flag=1" >> /root/.rvmrc
+# RUN echo "rvm_silence_path_mismatch_check_flag=1" >> /root/.rvmrc
 RUN git config --global core.editor "code --wait"; \
     git config --global init.defaultBranch main
 # end
@@ -126,11 +128,14 @@ RUN git config --global core.editor "code --wait"; \
 # # RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 # # end
 
-# # Java
-# # RUN yes | pacman -S jre-openjdk-headless jdk-openjdk
-# # ENV JAVA_HOME=/usr/lib/jvm/default/
-# # ENV PATH=$JAVA_HOME/bin:$PATH
-# # end
+# Java
+RUN yes | pacman -S jre-openjdk-headless jdk-openjdk
+ENV JAVA_HOME=/usr/lib/jvm/default/
+ENV PATH=$JAVA_HOME/bin:$PATH
+COPY apache-maven-3.9.0-bin.tar.gz /tmp/apache-maven-3.9.0-bin.tar.gz
+RUN mkdir /usr/local/maven && tar xzf /tmp/apache-maven-3.9.0-bin.tar.gz -C /usr/local/maven/ --strip-components=1
+ENV PATH /usr/local/maven/bin/:$PATH
+# end
 
 # # neovim
 # # RUN git clone --depth=1 https://github.com/frankfang/nvim-config.git /root/.config/nvim/ &&\
